@@ -17,7 +17,7 @@ export class CartProductService {
 
   async addProductToCart(data: CartProductCreateDTO, payloadJwt: {id: number}) {
     const accountId = payloadJwt.id;
-    const product = await this.productRepository.findOne({ where: {name: data.name }});
+    const product = await this.productRepository.findOne({ where: {id: data.id }});
     if(!product) {
       throw new BadRequestException("Product does not exist");
     }
@@ -38,7 +38,6 @@ export class CartProductService {
         ...data,
         account: account,
         product: product,
-        path: product.path
       };
       await this.cartProductRepository.save(newData);
     }
@@ -47,13 +46,13 @@ export class CartProductService {
     };
   }
 
-  async deleteProductInCart(productId: number, payloadJwt: {id: number}) {
+  async deleteProductInCart(id: number, payloadJwt: {id: number}) {
     const accountId = payloadJwt.id;
     const itemInCart = await this.cartProductRepository
       .createQueryBuilder('cartProduct')
       .innerJoinAndSelect('cartProduct.account', 'account')
       .andWhere('cartProduct.accountId = :accountId', {accountId})
-      .andWhere('cartProduct.id = :productId', {productId})
+      .andWhere('cartProduct.id = :id', {id})
       .getOne();
     if(!itemInCart) {
       throw new BadRequestException("Product does not exist");
@@ -64,18 +63,18 @@ export class CartProductService {
     };
   }
 
-  async updateProductInCart(productId: number,payloadJwt: {id: number}, data: CartProductUpdateDTO) {
+  async updateProductInCart(id: number,payloadJwt: {id: number}, data: CartProductUpdateDTO) {
     const accountId = payloadJwt.id;
     const itemInCart = await this.cartProductRepository
       .createQueryBuilder('cartProduct')
       .innerJoinAndSelect('cartProduct.account', 'account')
       .andWhere('cartProduct.accountId = :accountId', {accountId})
-      .andWhere('cartProduct.id = :productId', {productId})
+      .andWhere('cartProduct.id = :id', {id})
       .getOne();
     if(!itemInCart) {
       throw new BadRequestException("Product does not exist");
     }
-    await this.cartProductRepository.update({id: productId}, {quantity: data.quantity});
+    await this.cartProductRepository.update({id: id}, {quantity: data.quantity});
     return {
       message: "update success"
     };
@@ -85,8 +84,9 @@ export class CartProductService {
     const accountId = payloadJwt.id;
     const itemInCarts = await this.cartProductRepository
       .createQueryBuilder('cartProduct')
-      .innerJoinAndSelect('cartProduct.account', 'account')
-      .andWhere('cartProduct.accountId = :accountId', {accountId})
+      .innerJoinAndSelect('cartProduct.product', 'product')
+      .where('cartProduct.accountId = :accountId', {accountId})
+      .select(['cartProduct.id', 'product.name', 'cartProduct.quantity', 'product.cost', 'product.path'])
       .getMany();
     return {
       listProduct: itemInCarts
