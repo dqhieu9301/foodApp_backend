@@ -26,4 +26,11 @@ export class ProductService {
       listProduct: listProduct
     };
   }
+
+  async getDetailProduct(productId: number) {
+    const product = await this.productRepository.findOne({ where: { id: productId }});
+    return {
+      product
+    };
+  }
 }

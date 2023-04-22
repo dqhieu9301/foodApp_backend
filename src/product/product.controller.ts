@@ -1,4 +1,4 @@
-import { Body, Controller, Get, ParseFilePipe, Post, Query, UploadedFile, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, ParseFilePipe, Post, Query, UploadedFile, UseInterceptors, UsePipes, ValidationPipe, Param, ParseIntPipe } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ProductService } from './product.service';
 import { ProductCreateDTO } from './dto/product-create.dto';
@@ -27,5 +27,11 @@ export class ProductController {
   async getListProductByType(@Query('type') type: string) {
     return this.productService.getListProductByType(type);
   }
+
+  @Get('/get-detail-product/:productId')
+  async getDetailProduct(@Param('productId', ParseIntPipe) productId: number) {
+    return this.productService.getDetailProduct(productId);
+  }
+  
 }
 

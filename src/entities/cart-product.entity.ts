@@ -11,16 +11,7 @@ export class CartProduct {
       id: number;
 
     @Column()
-      name: string;
-
-    @Column()
       quantity: number;
-
-    @Column()
-      cost: number;
-
-    @Column()
-      path: string;
       
     @CreateDateColumn()
       createAt: Date;
