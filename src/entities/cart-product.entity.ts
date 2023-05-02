@@ -12,7 +12,10 @@ export class CartProduct {
 
     @Column()
       quantity: number;
-      
+    
+    @Column()
+      status: boolean;
+    
     @CreateDateColumn()
       createAt: Date;
 

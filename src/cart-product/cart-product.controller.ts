@@ -4,6 +4,7 @@ import { CartProductCreateDTO } from './dto/cart-product-create.dto';
 import { AuthGuard } from '../auth/auth.guard';
 import { ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { CartProductUpdateDTO } from './dto/cart-product-update.dto';
+import { BuyProductsInCartDTO } from './dto/buy-products-in-cart.dto';
 
 @Controller('/api/cart-product')
 @ApiTags("Cart-Product")
@@ -38,5 +39,12 @@ export class CartProductController {
   @UseGuards(AuthGuard)
   async getAllProductInCart(@Req() request: any) {
     return this.cartProductService.getAllListProductInCart(request.user);
+  }
+
+  @Post('/buy-products-in-cart')
+  @UseGuards(AuthGuard)
+  @UsePipes(new ValidationPipe())
+  async buyProductsInCart(@Req() request: any, @Body() data: BuyProductsInCartDTO) {
+    return this.cartProductService.buyProductsInCart(request.user,data);
   }
 }

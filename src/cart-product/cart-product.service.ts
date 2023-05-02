@@ -1,18 +1,21 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { CartProduct } from '../entities/cart-product.entity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { Account } from '../entities/account.entity';
 import { Product } from '../entities/product.entity';
 import { CartProductCreateDTO } from './dto/cart-product-create.dto';
 import { CartProductUpdateDTO } from './dto/cart-product-update.dto';
+import { BuyProductsInCartDTO } from './dto/buy-products-in-cart.dto';
 
 @Injectable()
 export class CartProductService {
   constructor(
         @InjectRepository(CartProduct) private readonly cartProductRepository: Repository<CartProduct>,
         @InjectRepository(Account) private readonly accountRepository: Repository<Account>,
-        @InjectRepository(Product) private readonly productRepository: Repository<Product>
+        @InjectRepository(Product) private readonly productRepository: Repository<Product>,
+        @InjectEntityManager() private readonly entityManager: EntityManager,
+
   ) {}
 
   async addProductToCart(data: CartProductCreateDTO, payloadJwt: {id: number}) {
@@ -22,12 +25,14 @@ export class CartProductService {
       throw new BadRequestException("Product does not exist");
     }
     const productId = product.id;
+    const status = false;
     const itemInCart = await this.cartProductRepository
       .createQueryBuilder('cartProduct')
       .innerJoinAndSelect('cartProduct.account', 'account')
       .innerJoinAndSelect('cartProduct.product', 'product')
       .andWhere('cartProduct.accountId = :accountId', {accountId})
       .andWhere('cartProduct.productId = :productId', {productId})
+      .andWhere('cartProduct.status = :status', {status})
       .getOne();
     if(itemInCart) {
       await this.cartProductRepository.update({id: itemInCart.id}, { quantity: data.quantity + itemInCart.quantity});
@@ -35,9 +40,10 @@ export class CartProductService {
     else {
       const account = await this.accountRepository.findOne({ where: {id: accountId}});
       const newData = {
-        ...data,
+        quantity: data.quantity,
         account: account,
         product: product,
+        status: false
       };
       await this.cartProductRepository.save(newData);
     }
@@ -82,14 +88,32 @@ export class CartProductService {
 
   async getAllListProductInCart(payloadJwt: {id: number}) {
     const accountId = payloadJwt.id;
+    const status = false;
     const itemInCarts = await this.cartProductRepository
       .createQueryBuilder('cartProduct')
       .innerJoinAndSelect('cartProduct.product', 'product')
-      .where('cartProduct.accountId = :accountId', {accountId})
+      .where('cartProduct.accountId = :accountId and cartProduct.status = :status', {accountId, status})
       .select(['cartProduct.id', 'product.name', 'cartProduct.quantity', 'product.cost', 'product.path'])
       .getMany();
     return {
       listProduct: itemInCarts
     };
+  }
+
+  async buyProductsInCart(payloadJwt: {id: number}, data: BuyProductsInCartDTO) {
+    const accountId = payloadJwt.id;
+    const listId = data.listId;
+    await this.entityManager.transaction(async (entityManager) => {
+      await Promise.all(listId.map(async (id) => {
+        const queryProductInCart = `select * from cart_product where id = ${id} AND accountId = ${accountId}`;
+        const productInCart = await entityManager.query(queryProductInCart);
+  
+        if(!productInCart[0]) {
+          throw new BadRequestException(`Product with id ${id} does not exist`);
+        }
+      
+        await this.cartProductRepository.update({id: productInCart[0].id}, {status: true });
+      }));
+    });
   }
 }
