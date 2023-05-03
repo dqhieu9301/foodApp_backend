@@ -41,6 +41,12 @@ export class CartProductController {
     return this.cartProductService.getAllListProductInCart(request.user);
   }
 
+  @Get('/get-product-bought')
+  @UseGuards(AuthGuard)
+  async getAllListProductBought(@Req() request: any) {
+    return this.cartProductService.getAllListProductBought(request.user);
+  }
+
   @Post('/buy-products-in-cart')
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe())

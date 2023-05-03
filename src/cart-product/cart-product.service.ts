@@ -24,6 +24,9 @@ export class CartProductService {
     if(!product) {
       throw new BadRequestException("Product does not exist");
     }
+    if(data.quantity > product.quantity) {
+      throw new BadRequestException("The current quantity is not larger than the current quantity");
+    }
     const productId = product.id;
     const status = false;
     const itemInCart = await this.cartProductRepository
@@ -45,6 +48,7 @@ export class CartProductService {
         product: product,
         status: false
       };
+      await this.productRepository.update({id: productId}, {quantity: product.quantity - data.quantity});
       await this.cartProductRepository.save(newData);
     }
     return {
@@ -100,6 +104,20 @@ export class CartProductService {
     };
   }
 
+  async getAllListProductBought(payloadJwt: {id: number}) {
+    const accountId = payloadJwt.id;
+    const status = true;
+    const itemInCarts = await this.cartProductRepository
+      .createQueryBuilder('cartProduct')
+      .innerJoinAndSelect('cartProduct.product', 'product')
+      .where('cartProduct.accountId = :accountId and cartProduct.status = :status', {accountId, status})
+      .select(['cartProduct.id', 'product.name', 'cartProduct.quantity', 'product.cost', 'product.path'])
+      .getMany();
+    return {
+      listProduct: itemInCarts
+    };
+  }
+
   async buyProductsInCart(payloadJwt: {id: number}, data: BuyProductsInCartDTO) {
     const accountId = payloadJwt.id;
     const listId = data.listId;
@@ -115,5 +133,8 @@ export class CartProductService {
         await this.cartProductRepository.update({id: productInCart[0].id}, {status: true });
       }));
     });
+    return {
+      message: "buy product success"
+    };
   }
 }
