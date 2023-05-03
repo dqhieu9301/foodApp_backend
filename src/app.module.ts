@@ -25,11 +25,11 @@ dotenv.config();
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: process.env.PASSWORD_DB,
-      database: 'foodAppDB',
+      host: '20.205.137.244',
+      port: 3976,
+      username: 'mysql-server',
+      password: 'mysql-server',
+      database: 'base-db',
       entities: [User, Account, CartProduct, Product, Token],
       // synchronize: true
     }),

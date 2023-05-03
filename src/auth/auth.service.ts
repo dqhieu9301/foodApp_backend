@@ -53,7 +53,8 @@ export class AuthService {
     const payload = { id: account.id };
     const accessToken = await this.jwtService.signAsync(payload, { secret: process.env.SECRET_KEY, expiresIn: "1d" });
     return {
-      accessToken: accessToken
+      accessToken: accessToken,
+      statusCode: 201
     };
   }
 
