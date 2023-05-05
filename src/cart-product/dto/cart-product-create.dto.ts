@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty } from "class-validator";
+import { IsInt, IsNotEmpty, Min } from "class-validator";
 import { Transform } from 'class-transformer';
 import { ApiProperty } from "@nestjs/swagger";
 
@@ -14,5 +14,6 @@ export class CartProductCreateDTO {
     @IsNotEmpty()
     @Transform(({ value }) => parseInt(value))
     @IsInt()
+    @Min(1)
       quantity: number;
 }

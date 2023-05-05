@@ -20,15 +20,19 @@ export class CartProductService {
 
   async addProductToCart(data: CartProductCreateDTO, payloadJwt: {id: number}) {
     const accountId = payloadJwt.id;
+    
     const product = await this.productRepository.findOne({ where: {id: data.id }});
     if(!product) {
       throw new BadRequestException("Product does not exist");
     }
+
     if(data.quantity > product.quantity) {
       throw new BadRequestException("The current quantity is not larger than the current quantity");
     }
+
     const productId = product.id;
     const status = false;
+
     const itemInCart = await this.cartProductRepository
       .createQueryBuilder('cartProduct')
       .innerJoinAndSelect('cartProduct.account', 'account')
@@ -67,7 +71,7 @@ export class CartProductService {
     if(!itemInCart) {
       throw new BadRequestException("Product does not exist");
     }
-    await this.cartProductRepository.delete({id: itemInCart.id});
+    await this.cartProductRepository.softDelete({id: itemInCart.id});
     return {
       message: "delete success"
     };

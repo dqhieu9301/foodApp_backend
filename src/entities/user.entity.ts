@@ -1,8 +1,9 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, OneToOne, JoinColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, OneToOne, JoinColumn } from "typeorm";
 import { Account } from "./account.entity";
+import { BaseEntity } from "./base.entity";
 
 @Entity()
-export class User {
+export class User extends BaseEntity {
     @PrimaryGeneratedColumn('increment')
       id: number;
 
@@ -15,10 +16,7 @@ export class User {
     @Column()
       phone: string;
       
-    @CreateDateColumn()
-      createAt: Date;
-
-      @OneToOne(() => Account)
-      @JoinColumn()
-        account: Account;
+    @OneToOne(() => Account)
+    @JoinColumn()
+      account: Account;
 }

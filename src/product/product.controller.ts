@@ -2,7 +2,7 @@ import { Body, Controller, Get, ParseFilePipe, Post, Query, UploadedFile, UseInt
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ProductService } from './product.service';
 import { ProductCreateDTO } from './dto/product-create.dto';
-import { ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('/api/product')
 @ApiTags("Product")
@@ -10,7 +10,7 @@ export class ProductController {
   constructor(
         private readonly productService: ProductService
   ) {}
-  @ApiSecurity('JWT-auth')
+
     @Post('/create')
     @UsePipes(new ValidationPipe())
     @UseInterceptors(FileInterceptor('file'))
@@ -24,10 +24,15 @@ export class ProductController {
   }
 
   @Get('/get-list-product')
-  async getListProductByType(@Query('type') type: string) {
-    return this.productService.getListProductByType(type);
-  }
+    async getListProductByType(@Query('type') type: string) {
+      return this.productService.getListProductByType(type);
+    }
 
+  @Get('/search-product')
+  async searchProduct(@Query('search') search: string) {
+    return this.productService.searchProduct(search);
+  }
+    
   @Get('/get-detail-product/:productId')
   async getDetailProduct(@Param('productId', ParseIntPipe) productId: number) {
     return this.productService.getDetailProduct(productId);

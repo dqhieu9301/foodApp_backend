@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -14,6 +15,7 @@ import { Product } from './entities/product.entity';
 import { Token } from './entities/token.entity';
 import { CloudinaryModule } from 'nestjs-cloudinary';
 import * as cloudinary from 'cloudinary';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 dotenv.config();
 
 @Module({
@@ -23,15 +25,21 @@ dotenv.config();
       api_key: process.env.API_KEY_CLOUD,
       api_secret: process.env.API_SECRET_KEY_CLOUD,
     }),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: '20.205.137.244',
-      port: 3976,
-      username: 'mysql-server',
-      password: 'mysql-server',
-      database: 'base-db',
-      entities: [User, Account, CartProduct, Product, Token],
-      // synchronize: true
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        type: 'mysql',
+        host: process.env.HOST_DB,
+        port: Number(process.env.PORT_DB),
+        username: process.env.USERNAME_DB,
+        password: process.env.PASSWORD_DB,
+        database: process.env.NAME_DB,
+        entities: [User, Account, CartProduct, Product, Token],
+        softDelete: true
+        // synchronize: true,
+      })
+
     }),
     AuthModule, ProductModule, UserModule, CartProductModule],
   controllers: [AppController],

@@ -1,9 +1,10 @@
-import { PrimaryGeneratedColumn, CreateDateColumn, Column, OneToMany } from 'typeorm';
+import { PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Entity } from 'typeorm';
 import { CartProduct } from './cart-product.entity';
+import { BaseEntity } from './base.entity';
 
 @Entity()
-export class Account {
+export class Account extends BaseEntity{
     @PrimaryGeneratedColumn('increment')
       id: number;
 
@@ -13,9 +14,6 @@ export class Account {
     @Column()
       password: string;
 
-    @CreateDateColumn()
-      createAt: Date;
-
-      @OneToMany(() => CartProduct, (cartProduct) => cartProduct.account)
-        cartProducts: CartProduct[];
+    @OneToMany(() => CartProduct, (cartProduct) => cartProduct.account)
+      cartProducts: CartProduct[];
 }
