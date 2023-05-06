@@ -16,7 +16,7 @@ export class Product extends BaseEntity {
     @Column()
       cost: number;
 
-    @Column()
+    @Column({ type: 'varchar', length: 5000 })
       describe: string;
 
     @Column()

@@ -36,7 +36,7 @@ dotenv.config();
         password: process.env.PASSWORD_DB,
         database: process.env.NAME_DB,
         entities: [User, Account, CartProduct, Product, Token],
-        softDelete: true
+        softDelete: true,
         // synchronize: true,
       })
 
