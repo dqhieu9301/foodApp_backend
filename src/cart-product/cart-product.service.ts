@@ -100,7 +100,7 @@ export class CartProductService {
     const itemInCarts = await this.cartProductRepository
       .createQueryBuilder('cartProduct')
       .innerJoinAndSelect('cartProduct.product', 'product')
-      .where('cartProduct.accountId = :accountId and cartProduct.status = :status', {accountId, status})
+      .where('cartProduct.accountId = :accountId and cartProduct.status = :status and cartProduct.productId = product.id', {accountId, status})
       .select(['cartProduct.id', 'product.name', 'cartProduct.quantity', 'product.cost', 'product.path'])
       .getMany();
     return {
@@ -114,7 +114,7 @@ export class CartProductService {
     const itemInCarts = await this.cartProductRepository
       .createQueryBuilder('cartProduct')
       .innerJoinAndSelect('cartProduct.product', 'product')
-      .where('cartProduct.accountId = :accountId and cartProduct.status = :status', {accountId, status})
+      .where('cartProduct.accountId = :accountId and cartProduct.status = :status and cartProduct.productId = product.id', {accountId, status})
       .select(['cartProduct.id', 'product.name', 'cartProduct.quantity', 'product.cost', 'product.path'])
       .getMany();
     return {
@@ -139,6 +139,19 @@ export class CartProductService {
     });
     return {
       message: "buy product success"
+    };
+  }
+
+  async getListProductHistory(payloadJwt: {id: number}) {
+    const accountId = payloadJwt.id;
+    const status = true;
+    const query = `select product.name, cart_product.quantity, product.path, cart_product.updated_at
+      from cart_product inner join product on product.id = cart_product.productId
+      where  cart_product.accountId = ${accountId} and cart_product.status = ${status}`;
+    const listProductHistory = await this.cartProductRepository.query(query);
+
+    return {
+      listProductHistory: listProductHistory
     };
   }
 }

@@ -53,4 +53,10 @@ export class CartProductController {
   async buyProductsInCart(@Req() request: any, @Body() data: BuyProductsInCartDTO) {
     return this.cartProductService.buyProductsInCart(request.user,data);
   }
+
+  @Get('/get-list-product-history')
+  @UseGuards(AuthGuard)
+  async getListProductHistory(@Req() request: any) {
+    return this.cartProductService.getListProductHistory(request.user);
+  }
 }

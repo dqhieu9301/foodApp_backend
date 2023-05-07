@@ -38,6 +38,7 @@ dotenv.config();
         entities: [User, Account, CartProduct, Product, Token],
         softDelete: true,
         // synchronize: true,
+
       })
 
     }),
