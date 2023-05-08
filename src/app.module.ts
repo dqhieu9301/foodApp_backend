@@ -22,19 +22,19 @@ dotenv.config();
   imports: [
     CloudinaryModule.forRoot({
       cloud_name: "doe8iuzbo",
-      api_key: process.env.API_KEY_CLOUD,
-      api_secret: process.env.API_SECRET_KEY_CLOUD,
+      api_key: "342216789181756",
+      api_secret: "GmqaBGnArUMbkXOwelDO28BKaq4",
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         type: 'mysql',
-        host: process.env.HOST_DB,
-        port: Number(process.env.PORT_DB),
-        username: process.env.USERNAME_DB,
-        password: process.env.PASSWORD_DB,
-        database: process.env.NAME_DB,
+        host: "20.205.137.244",
+        port: 3976,
+        username: "mysql-server",
+        password: "mysql-server",
+        database: "base-db",
         entities: [User, Account, CartProduct, Product, Token],
         softDelete: true,
         // synchronize: true,
