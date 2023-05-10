@@ -4,7 +4,6 @@ import { CartProductCreateDTO } from './dto/cart-product-create.dto';
 import { AuthGuard } from '../auth/auth.guard';
 import { ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { CartProductUpdateDTO } from './dto/cart-product-update.dto';
-import { BuyProductsInCartDTO } from './dto/buy-products-in-cart.dto';
 
 @Controller('/api/cart-product')
 @ApiTags("Cart-Product")
@@ -50,13 +49,18 @@ export class CartProductController {
   @Post('/buy-products-in-cart')
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe())
-  async buyProductsInCart(@Req() request: any, @Body() data: BuyProductsInCartDTO) {
-    return this.cartProductService.buyProductsInCart(request.user,data);
+  async buyProductsInCart(@Req() request: any) {
+    return this.cartProductService.buyProductsInCart(request.user);
   }
 
   @Get('/get-list-product-history')
   @UseGuards(AuthGuard)
   async getListProductHistory(@Req() request: any) {
     return this.cartProductService.getListProductHistory(request.user);
+  }
+
+  @Get('/random-product')
+  async randomProduct() {
+    return this.cartProductService.randomProduct();
   }
 }

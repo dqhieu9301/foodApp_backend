@@ -6,7 +6,6 @@ import { Account } from '../entities/account.entity';
 import { Product } from '../entities/product.entity';
 import { CartProductCreateDTO } from './dto/cart-product-create.dto';
 import { CartProductUpdateDTO } from './dto/cart-product-update.dto';
-import { BuyProductsInCartDTO } from './dto/buy-products-in-cart.dto';
 
 @Injectable()
 export class CartProductService {
@@ -122,21 +121,18 @@ export class CartProductService {
     };
   }
 
-  async buyProductsInCart(payloadJwt: {id: number}, data: BuyProductsInCartDTO) {
+  async buyProductsInCart(payloadJwt: {id: number}) {
     const accountId = payloadJwt.id;
-    const listId = data.listId;
-    await this.entityManager.transaction(async (entityManager) => {
-      await Promise.all(listId.map(async (id) => {
-        const queryProductInCart = `select * from cart_product where id = ${id} AND accountId = ${accountId}`;
-        const productInCart = await entityManager.query(queryProductInCart);
-  
-        if(!productInCart[0]) {
-          throw new BadRequestException(`Product with id ${id} does not exist`);
-        }
-      
-        await this.cartProductRepository.update({id: productInCart[0].id}, {status: true });
-      }));
-    });
+    const listIdProductWillBuy = await this.cartProductRepository
+      .createQueryBuilder('cart_product')
+      .select(['cart_product.id as id'])
+      .where('cart_product.accountId = :accountId and cart_product.status = false', {accountId})
+      .getRawMany();
+    await Promise.all(
+      listIdProductWillBuy.map(async (item: {id: number}) => {
+        await this.cartProductRepository.update({id: item.id}, { status: true });
+      })
+    );
     return {
       message: "buy product success"
     };
@@ -145,13 +141,26 @@ export class CartProductService {
   async getListProductHistory(payloadJwt: {id: number}) {
     const accountId = payloadJwt.id;
     const status = true;
-    const query = `select product.name, cart_product.quantity, product.path, cart_product.updated_at
+    const query = `select product.id, product.name, cart_product.quantity, product.path, cart_product.updated_at, product.cost
       from cart_product inner join product on product.id = cart_product.productId
       where  cart_product.accountId = ${accountId} and cart_product.status = ${status}`;
     const listProductHistory = await this.cartProductRepository.query(query);
 
     return {
       listProductHistory: listProductHistory
+    };
+  }
+
+  async randomProduct() {
+    const listProductRandom = await this.productRepository
+      .createQueryBuilder('product')
+      .select(['product.id', 'product.name', 'product.cost', 'product.path', 'product.describe', 'product.type', 'product.quantity'])
+      .orderBy('RAND()')
+      .take(4)
+      .getMany();
+    
+    return {
+      listProductRandom
     };
   }
 }
