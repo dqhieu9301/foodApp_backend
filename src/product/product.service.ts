@@ -47,7 +47,7 @@ export class ProductService {
   async getDetailProduct(productId: number) {
     const product = await this.productRepository
       .createQueryBuilder('product')
-      .select(['product.id', 'product.name', 'product.type', 'product.path', 'product.cost', 'product.quantity, product.describe'])
+      .select(['product.id', 'product.name', 'product.type', 'product.path', 'product.cost', 'product.quantity', 'product.describe'])
       .where('product.id = :productId', {productId})
       .getOne();
     if(!product) {
